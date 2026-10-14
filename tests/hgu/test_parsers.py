@@ -116,3 +116,12 @@ def test_error_result_raises() -> None:
 def test_not_xml_raises() -> None:
     with pytest.raises(HguResponseError):
         parsers.parse_summary("<HTML><BODY>Access Error: 400</BODY></HTML>")
+
+
+def test_binary_garbage_in_a_field_is_tolerated() -> None:
+    """The real cbGetGPONInfo carries raw bytes in <OnuRegId> (control chars)."""
+    raw = fixture("cbGetGPONInfo.xml").replace(
+        "<OnuRegId>REDACTED</OnuRegId>", "<OnuRegId>\xf2\x01\x80\x08\x06\x95\x95</OnuRegId>"
+    )
+    assert "\x01" in raw
+    assert parsers.parse_gpon(raw).onu_state == 5

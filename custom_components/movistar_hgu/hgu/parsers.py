@@ -38,12 +38,15 @@ from .models import (
 )
 
 _RESULT_OK = "0"
+# XML 1.0 forbids most C0 control characters; the router emits some raw
+# (e.g. the binary <OnuRegId> in cbGetGPONInfo), so they are dropped first.
+_INVALID_XML_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 
 def _body(text: str) -> Element:
     """Return the ``<cbGetX>`` element after checking ``Result``."""
     try:
-        root = fromstring(text.strip())
+        root = fromstring(_INVALID_XML_CHARS.sub("", text).strip())
     except (ParseError, ValueError) as err:
         raise HguResponseError(f"Not an XML response: {text[:80]!r}") from err
     if root.tag != "Response" or len(root) == 0:
