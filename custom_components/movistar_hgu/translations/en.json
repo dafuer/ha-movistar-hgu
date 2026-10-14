@@ -1,0 +1,230 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Movistar router",
+        "description": "Use the router admin password (the one on its sticker unless changed), not the Wi-Fi key.",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Router password",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Change connection",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the router",
+      "invalid_auth": "Wrong password. Note: the router locks out for a while after several failures.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This router is already configured",
+      "reauth_successful": "Password updated",
+      "reconfigure_successful": "Connection updated",
+      "wrong_router": "That address belongs to a different router"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SSH console",
+        "description": "Enable SSH reads (temperatures and TR-069 status). Same password; the router host key is pinned on first connection.",
+        "data": {
+          "ssh_enabled": "Use SSH",
+          "ssh_port": "SSH port"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_boot": {
+        "name": "Last boot"
+      },
+      "cpu_usage": {
+        "name": "CPU usage"
+      },
+      "memory_usage": {
+        "name": "Memory usage"
+      },
+      "load_1": {
+        "name": "Load (1 min)"
+      },
+      "load_5": {
+        "name": "Load (5 min)"
+      },
+      "load_15": {
+        "name": "Load (15 min)"
+      },
+      "optical_rx_power": {
+        "name": "Optical RX power"
+      },
+      "optical_tx_power": {
+        "name": "Optical TX power"
+      },
+      "optical_temperature": {
+        "name": "Optical module temperature"
+      },
+      "optical_voltage": {
+        "name": "Optical module voltage"
+      },
+      "optical_bias_current": {
+        "name": "Laser bias current"
+      },
+      "onu_state": {
+        "name": "ONT state",
+        "state": {
+          "o1": "O1 · Initial",
+          "o2": "O2 · Standby",
+          "o3": "O3 · Serial number",
+          "o4": "O4 · Ranging",
+          "o5": "O5 · Operational",
+          "o6": "O6 · Intermittent LODS",
+          "o7": "O7 · Emergency stop"
+        }
+      },
+      "pon_up_since": {
+        "name": "Fiber up since"
+      },
+      "connected_clients": {
+        "name": "Connected clients"
+      },
+      "wired_clients": {
+        "name": "Wired clients"
+      },
+      "wifi_clients": {
+        "name": "Wi-Fi clients"
+      },
+      "iot_install_remaining": {
+        "name": "IoT install time left"
+      },
+      "router_voice_line": {
+        "name": "Router voice line"
+      },
+      "temperature_soc": {
+        "name": "SoC temperature"
+      },
+      "temperature_wifi_24": {
+        "name": "2.4 GHz radio temperature"
+      },
+      "temperature_wifi_5": {
+        "name": "5 GHz radio temperature"
+      },
+      "tr069_status": {
+        "name": "Remote management (TR-069)"
+      },
+      "public_ip": {
+        "name": "Public IP"
+      },
+      "voice_ip": {
+        "name": "Voice IP"
+      },
+      "iptv_ip": {
+        "name": "TV IP"
+      },
+      "wifi_24_channel": {
+        "name": "2.4 GHz Wi-Fi channel"
+      },
+      "wifi_5_channel": {
+        "name": "5 GHz Wi-Fi channel"
+      },
+      "port_mappings": {
+        "name": "Port mappings"
+      },
+      "internet_download_total": {
+        "name": "Downloaded (Internet)"
+      },
+      "internet_upload_total": {
+        "name": "Uploaded (Internet)"
+      },
+      "internet_download_rate": {
+        "name": "Download rate (Internet)"
+      },
+      "internet_upload_rate": {
+        "name": "Upload rate (Internet)"
+      },
+      "voice_download_total": {
+        "name": "Downloaded (voice)"
+      },
+      "voice_upload_total": {
+        "name": "Uploaded (voice)"
+      },
+      "voice_download_rate": {
+        "name": "Download rate (voice)"
+      },
+      "voice_upload_rate": {
+        "name": "Upload rate (voice)"
+      },
+      "iptv_download_total": {
+        "name": "Downloaded (TV)"
+      },
+      "iptv_upload_total": {
+        "name": "Uploaded (TV)"
+      },
+      "iptv_download_rate": {
+        "name": "Download rate (TV)"
+      },
+      "iptv_upload_rate": {
+        "name": "Upload rate (TV)"
+      }
+    },
+    "binary_sensor": {
+      "wan_internet": {
+        "name": "Internet connection"
+      },
+      "wan_voice": {
+        "name": "Voice connection"
+      },
+      "wan_iptv": {
+        "name": "TV connection"
+      },
+      "ethernet_port": {
+        "name": "Port {port}"
+      },
+      "wifi_24": {
+        "name": "2.4 GHz Wi-Fi"
+      },
+      "wifi_5": {
+        "name": "5 GHz Wi-Fi"
+      },
+      "upnp": {
+        "name": "UPnP"
+      },
+      "remote_syslog": {
+        "name": "Remote syslog"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Reboot router"
+      },
+      "iot_install_start": {
+        "name": "Start IoT install (10 min)"
+      },
+      "iot_install_cancel": {
+        "name": "Cancel IoT install"
+      }
+    },
+    "switch": {
+      "guest_wifi": {
+        "name": "Guest Wi-Fi"
+      }
+    }
+  },
+  "exceptions": {
+    "action_failed": {
+      "message": "The router rejected the action: {error}"
+    }
+  }
+}

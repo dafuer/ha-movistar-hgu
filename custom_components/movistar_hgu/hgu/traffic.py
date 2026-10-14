@@ -6,7 +6,7 @@ interprets each new raw value against the previous one:
 
 * growth → the difference;
 * a decrease right after a router reboot → the counter restarted at zero;
-* a decrease otherwise → one wrap (raw + 2³² − previous);
+* a decrease otherwise → one wrap (raw + 2^32 - previous);
 * a jump bigger than the link could carry in the interval → glitch, ignored.
 
 With a 30 s poll a second wrap would need > 1.1 Gbit/s sustained, more than

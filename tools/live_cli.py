@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from custom_components.movistar_hgu.hgu.cli import (  # noqa: E402
+from custom_components.movistar_hgu.hgu.cli import (
     HguCli,
     parse_temperatures,
     parse_tr069,
@@ -17,9 +17,11 @@ from custom_components.movistar_hgu.hgu.cli import (  # noqa: E402
 
 
 async def main() -> None:
-    pw = subprocess.run(
+    pw = subprocess.run(  # noqa: ASYNC221 - one-off dev tool
         ["security", "find-generic-password", "-s", "hgu-movistar", "-a", "1234", "-w"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout.rstrip("\n")
     cli = HguCli("192.168.1.1", pw)
     t = time.monotonic()

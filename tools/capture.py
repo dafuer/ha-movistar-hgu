@@ -22,7 +22,9 @@ OUT = Path(__file__).resolve().parent.parent / "captures"
 def keychain_password() -> str:
     return subprocess.run(
         ["security", "find-generic-password", "-s", "hgu-movistar", "-a", "1234", "-w"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout.rstrip("\n")
 
 

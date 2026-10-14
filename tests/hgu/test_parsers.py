@@ -22,6 +22,8 @@ def test_summary() -> None:
     assert info.memory_pct == 44
     assert info.load == (7.14, 7.22, 7.26)
     assert info.onu_state == 5
+    assert info.serial_number == "REDACTED"  # sanitized fixture
+    assert "serial" not in repr(info)
 
 
 def test_gpon() -> None:

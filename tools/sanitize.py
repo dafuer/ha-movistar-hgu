@@ -28,10 +28,26 @@ PUBLIC_IP = re.compile(r"\b81\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
 
 # Page variables the integration reads; everything else in a page is dropped.
 PAGE_VARS = {
-    "te_wifi.asp": ["sessionKey", "tef_assoc_state", "tef_assoc_time_left", "wifiActive",
-                    "wifi5GActive", "unitNum"],
-    "te_wifi_guest.asp": ["sessionKey", "ssid_id", "acc_pt_id", "wifiSSIDName", "wifiActive",
-                          "wifiAuthMode", "wifiPassword", "wpaPskKey", "unitNum", "uniqueSSID"],
+    "te_wifi.asp": [
+        "sessionKey",
+        "tef_assoc_state",
+        "tef_assoc_time_left",
+        "wifiActive",
+        "wifi5GActive",
+        "unitNum",
+    ],
+    "te_wifi_guest.asp": [
+        "sessionKey",
+        "ssid_id",
+        "acc_pt_id",
+        "wifiSSIDName",
+        "wifiActive",
+        "wifiAuthMode",
+        "wifiPassword",
+        "wpaPskKey",
+        "unitNum",
+        "uniqueSSID",
+    ],
 }
 
 _mac_map: dict[str, str] = {}

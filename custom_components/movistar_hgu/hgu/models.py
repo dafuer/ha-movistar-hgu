@@ -38,6 +38,9 @@ class SystemInfo:
     total_ram_kb: int
     free_ram_kb: int
     onu_state: int
+    # Stable identity of the box (ONT serial). Not secret, but not shown either:
+    # only used as the config entry's unique id, and redacted in diagnostics.
+    serial_number: str = field(default="", repr=False)
 
 
 @dataclass(frozen=True, slots=True)

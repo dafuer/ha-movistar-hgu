@@ -1,0 +1,230 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Router Movistar",
+        "description": "La contraseña es la de acceso al router (la de la pegatina, si no la has cambiado), no la del Wi-Fi.",
+        "data": {
+          "host": "Dirección",
+          "password": "Contraseña"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Contraseña del router",
+        "data": {
+          "password": "Contraseña"
+        }
+      },
+      "reconfigure": {
+        "title": "Cambiar conexión",
+        "data": {
+          "host": "Dirección",
+          "password": "Contraseña"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "No se puede conectar con el router",
+      "invalid_auth": "Contraseña incorrecta. Ojo: el router bloquea un rato tras varios fallos.",
+      "unknown": "Error inesperado"
+    },
+    "abort": {
+      "already_configured": "Este router ya está configurado",
+      "reauth_successful": "Contraseña actualizada",
+      "reconfigure_successful": "Conexión actualizada",
+      "wrong_router": "Esa dirección es de otro router"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Consola SSH",
+        "description": "Activa la lectura por SSH (temperaturas y estado de TR-069). Usa la misma contraseña; la clave del router se fija en la primera conexión.",
+        "data": {
+          "ssh_enabled": "Usar SSH",
+          "ssh_port": "Puerto SSH"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "last_boot": {
+        "name": "Último arranque"
+      },
+      "cpu_usage": {
+        "name": "Uso de CPU"
+      },
+      "memory_usage": {
+        "name": "Uso de memoria"
+      },
+      "load_1": {
+        "name": "Carga (1 min)"
+      },
+      "load_5": {
+        "name": "Carga (5 min)"
+      },
+      "load_15": {
+        "name": "Carga (15 min)"
+      },
+      "optical_rx_power": {
+        "name": "Potencia óptica recibida"
+      },
+      "optical_tx_power": {
+        "name": "Potencia óptica emitida"
+      },
+      "optical_temperature": {
+        "name": "Temperatura del módulo óptico"
+      },
+      "optical_voltage": {
+        "name": "Tensión del módulo óptico"
+      },
+      "optical_bias_current": {
+        "name": "Corriente de polarización del láser"
+      },
+      "onu_state": {
+        "name": "Estado de la ONT",
+        "state": {
+          "o1": "O1 · Inicial",
+          "o2": "O2 · En espera",
+          "o3": "O3 · Número de serie",
+          "o4": "O4 · Rango",
+          "o5": "O5 · Operativa",
+          "o6": "O6 · Interrumpida",
+          "o7": "O7 · Parada de emergencia"
+        }
+      },
+      "pon_up_since": {
+        "name": "Fibra conectada desde"
+      },
+      "connected_clients": {
+        "name": "Clientes conectados"
+      },
+      "wired_clients": {
+        "name": "Clientes por cable"
+      },
+      "wifi_clients": {
+        "name": "Clientes Wi-Fi"
+      },
+      "iot_install_remaining": {
+        "name": "Instalación IoT: tiempo restante"
+      },
+      "router_voice_line": {
+        "name": "Línea de voz del router"
+      },
+      "temperature_soc": {
+        "name": "Temperatura del procesador"
+      },
+      "temperature_wifi_24": {
+        "name": "Temperatura radio 2,4 GHz"
+      },
+      "temperature_wifi_5": {
+        "name": "Temperatura radio 5 GHz"
+      },
+      "tr069_status": {
+        "name": "Gestión remota (TR-069)"
+      },
+      "public_ip": {
+        "name": "IP pública"
+      },
+      "voice_ip": {
+        "name": "IP de voz"
+      },
+      "iptv_ip": {
+        "name": "IP de TV"
+      },
+      "wifi_24_channel": {
+        "name": "Canal Wi-Fi 2,4 GHz"
+      },
+      "wifi_5_channel": {
+        "name": "Canal Wi-Fi 5 GHz"
+      },
+      "port_mappings": {
+        "name": "Redirecciones de puertos"
+      },
+      "internet_download_total": {
+        "name": "Descargado (Internet)"
+      },
+      "internet_upload_total": {
+        "name": "Subido (Internet)"
+      },
+      "internet_download_rate": {
+        "name": "Velocidad de bajada (Internet)"
+      },
+      "internet_upload_rate": {
+        "name": "Velocidad de subida (Internet)"
+      },
+      "voice_download_total": {
+        "name": "Descargado (voz)"
+      },
+      "voice_upload_total": {
+        "name": "Subido (voz)"
+      },
+      "voice_download_rate": {
+        "name": "Velocidad de bajada (voz)"
+      },
+      "voice_upload_rate": {
+        "name": "Velocidad de subida (voz)"
+      },
+      "iptv_download_total": {
+        "name": "Descargado (TV)"
+      },
+      "iptv_upload_total": {
+        "name": "Subido (TV)"
+      },
+      "iptv_download_rate": {
+        "name": "Velocidad de bajada (TV)"
+      },
+      "iptv_upload_rate": {
+        "name": "Velocidad de subida (TV)"
+      }
+    },
+    "binary_sensor": {
+      "wan_internet": {
+        "name": "Conexión a internet"
+      },
+      "wan_voice": {
+        "name": "Conexión de voz"
+      },
+      "wan_iptv": {
+        "name": "Conexión de TV"
+      },
+      "ethernet_port": {
+        "name": "Puerto {port}"
+      },
+      "wifi_24": {
+        "name": "Wi-Fi 2,4 GHz"
+      },
+      "wifi_5": {
+        "name": "Wi-Fi 5 GHz"
+      },
+      "upnp": {
+        "name": "UPnP"
+      },
+      "remote_syslog": {
+        "name": "Syslog remoto"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Reiniciar router"
+      },
+      "iot_install_start": {
+        "name": "Iniciar instalación IoT (10 min)"
+      },
+      "iot_install_cancel": {
+        "name": "Cancelar instalación IoT"
+      }
+    },
+    "switch": {
+      "guest_wifi": {
+        "name": "Wi-Fi de invitados"
+      }
+    }
+  },
+  "exceptions": {
+    "action_failed": {
+      "message": "El router no aceptó la orden: {error}"
+    }
+  }
+}

@@ -139,9 +139,7 @@ class HguClient:
         except (aiohttp.ClientError, TimeoutError, OSError) as err:
             raise HguConnectionError(f"{method} {path}: {err}") from err
 
-    async def _authed(
-        self, method: str, path: str, *, data: dict[str, str] | None = None
-    ) -> str:
+    async def _authed(self, method: str, path: str, *, data: dict[str, str] | None = None) -> str:
         """Request needing a session: log in if needed, retry once if it expired."""
         async with self._lock:
             if not self._logged_in:

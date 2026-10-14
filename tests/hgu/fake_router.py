@@ -62,7 +62,12 @@ class FakeRouter:
     async def _record(self, request: web.Request, handler):  # type: ignore[no-untyped-def]
         form = dict(await request.post()) if request.method == "POST" else {}
         self.requests.append(
-            Recorded(request.method, request.path, dict(request.query), {k: str(v) for k, v in form.items()})
+            Recorded(
+                request.method,
+                request.path,
+                dict(request.query),
+                {k: str(v) for k, v in form.items()},
+            )
         )
         return await handler(request)
 
@@ -77,9 +82,10 @@ class FakeRouter:
 
     async def _login(self, request: web.Request) -> web.Response:
         form = await request.post()
-        if xor(str(form.get("loginPassword", ""))) != PASSWORD or xor(
-            str(form.get("loginUsername", ""))
-        ) != "1234":
+        if (
+            xor(str(form.get("loginPassword", ""))) != PASSWORD
+            or xor(str(form.get("loginUsername", ""))) != "1234"
+        ):
             return web.Response(
                 text="<script>var bruteTime = '0'; var user = 'xxx';</script>te_acceso_router",
                 content_type="text/html",
@@ -88,7 +94,7 @@ class FakeRouter:
         self.sessions.add(sid)
         self.logins += 1
         resp = web.Response(
-            text="<script>location.href = \"/te_wifi.asp\";</script>", content_type="text/html"
+            text='<script>location.href = "/te_wifi.asp";</script>', content_type="text/html"
         )
         resp.set_cookie(COOKIE, sid)
         return resp
@@ -126,11 +132,16 @@ class FakeRouter:
         if not self._authed(request):
             raise web.HTTPFound("/te_acceso_router.asp")
         if page == "te_wifi.asp":
-            text = fixture("te_wifi.asp").replace(
-                "var tef_assoc_time_left = '0'", f"var tef_assoc_time_left = '{self.iot_remaining}'"
-            ).replace(
-                "var tef_assoc_state = '0'",
-                f"var tef_assoc_state = '{1 if self.iot_remaining else 0}'",
+            text = (
+                fixture("te_wifi.asp")
+                .replace(
+                    "var tef_assoc_time_left = '0'",
+                    f"var tef_assoc_time_left = '{self.iot_remaining}'",
+                )
+                .replace(
+                    "var tef_assoc_state = '0'",
+                    f"var tef_assoc_state = '{1 if self.iot_remaining else 0}'",
+                )
             )
             return web.Response(text=text, content_type="text/html")
         if page == "te_wifi_guest.asp":
@@ -146,7 +157,9 @@ class FakeRouter:
         if not self._authed(request) or request.query.get("sessionKey") != "0123456789":
             raise web.HTTPFound("/te_acceso_router.asp")
         state = request.query.get("tef_assoc_state")
-        self.iot_remaining = int(request.query.get("tef_assoc_timeout_sec", "0")) if state == "1" else 0
+        self.iot_remaining = (
+            int(request.query.get("tef_assoc_timeout_sec", "0")) if state == "1" else 0
+        )
         raise web.HTTPFound(request.query.get("curWebPage", "/te_wifi.asp"))
 
     async def _guest_wl(self, request: web.Request) -> web.Response:

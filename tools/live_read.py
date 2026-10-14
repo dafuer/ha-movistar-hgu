@@ -15,13 +15,15 @@ from pathlib import Path
 import aiohttp
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from custom_components.movistar_hgu.hgu.client import HguClient  # noqa: E402
+from custom_components.movistar_hgu.hgu.client import HguClient
 
 
 def keychain_password() -> str:
     return subprocess.run(
         ["security", "find-generic-password", "-s", "hgu-movistar", "-a", "1234", "-w"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout.rstrip("\n")
 
 

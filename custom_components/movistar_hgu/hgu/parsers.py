@@ -100,6 +100,7 @@ def parse_summary(text: str) -> SystemInfo:
         total_ram_kb=_int(f.get("TotalRam")),
         free_ram_kb=_int(f.get("FreeRam")),
         onu_state=_int(f.get("OnuStatus")),
+        serial_number=f.get("OnuSerialNumber", ""),
     )
 
 

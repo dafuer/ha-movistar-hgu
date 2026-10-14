@@ -1,0 +1,138 @@
+{
+  "entity": {
+    "sensor": {
+      "last_boot": {
+        "default": "mdi:restart"
+      },
+      "cpu_usage": {
+        "default": "mdi:cpu-64-bit"
+      },
+      "memory_usage": {
+        "default": "mdi:memory"
+      },
+      "optical_rx_power": {
+        "default": "mdi:transit-connection-variant"
+      },
+      "optical_tx_power": {
+        "default": "mdi:transit-connection-variant"
+      },
+      "onu_state": {
+        "default": "mdi:fiber-manual-record"
+      },
+      "pon_up_since": {
+        "default": "mdi:timer-outline"
+      },
+      "connected_clients": {
+        "default": "mdi:devices"
+      },
+      "wired_clients": {
+        "default": "mdi:ethernet"
+      },
+      "wifi_clients": {
+        "default": "mdi:wifi"
+      },
+      "iot_install_remaining": {
+        "default": "mdi:timer-sand"
+      },
+      "router_voice_line": {
+        "default": "mdi:phone-classic"
+      },
+      "tr069_status": {
+        "default": "mdi:remote"
+      },
+      "public_ip": {
+        "default": "mdi:ip-network"
+      },
+      "voice_ip": {
+        "default": "mdi:phone-in-talk"
+      },
+      "iptv_ip": {
+        "default": "mdi:television"
+      },
+      "wifi_24_channel": {
+        "default": "mdi:wifi"
+      },
+      "wifi_5_channel": {
+        "default": "mdi:wifi"
+      },
+      "port_mappings": {
+        "default": "mdi:router-network"
+      },
+      "internet_download_total": {
+        "default": "mdi:download"
+      },
+      "internet_upload_total": {
+        "default": "mdi:upload"
+      },
+      "voice_download_total": {
+        "default": "mdi:download"
+      },
+      "voice_upload_total": {
+        "default": "mdi:upload"
+      },
+      "iptv_download_total": {
+        "default": "mdi:download"
+      },
+      "iptv_upload_total": {
+        "default": "mdi:upload"
+      },
+      "internet_download_rate": {
+        "default": "mdi:download-network"
+      },
+      "internet_upload_rate": {
+        "default": "mdi:upload-network"
+      },
+      "voice_download_rate": {
+        "default": "mdi:download-network"
+      },
+      "voice_upload_rate": {
+        "default": "mdi:upload-network"
+      },
+      "iptv_download_rate": {
+        "default": "mdi:download-network"
+      },
+      "iptv_upload_rate": {
+        "default": "mdi:upload-network"
+      }
+    },
+    "binary_sensor": {
+      "wan_internet": {
+        "default": "mdi:web"
+      },
+      "wan_voice": {
+        "default": "mdi:phone"
+      },
+      "wan_iptv": {
+        "default": "mdi:television"
+      },
+      "ethernet_port": {
+        "default": "mdi:ethernet"
+      },
+      "wifi_24": {
+        "default": "mdi:wifi"
+      },
+      "wifi_5": {
+        "default": "mdi:wifi"
+      },
+      "upnp": {
+        "default": "mdi:lan-connect"
+      },
+      "remote_syslog": {
+        "default": "mdi:math-log"
+      }
+    },
+    "button": {
+      "iot_install_start": {
+        "default": "mdi:access-point-plus"
+      },
+      "iot_install_cancel": {
+        "default": "mdi:access-point-remove"
+      }
+    },
+    "switch": {
+      "guest_wifi": {
+        "default": "mdi:wifi-star"
+      }
+    }
+  }
+}
