@@ -127,3 +127,15 @@ def test_binary_garbage_in_a_field_is_tolerated() -> None:
     )
     assert "\x01" in raw
     assert parsers.parse_gpon(raw).onu_state == 5
+
+
+def test_iot_state_lives_in_the_5ghz_block() -> None:
+    """te_wifi.asp declares tef_assoc_* twice: 2.4 GHz first, 5 GHz (the real one) later."""
+    page = (
+        "var tef_assoc_state = '0';\nvar tef_assoc_time_left = '0';\n"
+        "function getWifi5GStatus() {\n"
+        "var tef_assoc_state = '1';\nvar tef_assoc_time_left = '58';\n}"
+    )
+    iot = parsers.parse_iot_install(page)
+    assert iot.active is True
+    assert iot.remaining_s == 58

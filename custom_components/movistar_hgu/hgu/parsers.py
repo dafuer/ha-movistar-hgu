@@ -265,9 +265,18 @@ def is_login_page(page: str) -> bool:
     return "te_acceso_router" in page and "sessionKey" not in page
 
 
+def page_vars(page: str, name: str) -> list[str]:
+    """Every ``var name = '...'`` in a page (some pages declare a name twice)."""
+    return [html.unescape(v) for v in re.findall(_VAR.format(name=re.escape(name)), page)]
+
+
 def parse_iot_install(page: str) -> IotInstall:
-    remaining = _int(page_var(page, "tef_assoc_time_left"))
-    return IotInstall(
-        active=page_var(page, "tef_assoc_state") == "1" and remaining > 0,
-        remaining_s=remaining,
-    )
+    """IoT pairing window state.
+
+    ``te_wifi.asp`` declares ``tef_assoc_*`` once for 2.4 GHz and again inside
+    ``getWifi5GStatus()``; the window state lives in the second block (seen
+    live: 0/0 then 1/58 while the window was open). Take the most active one.
+    """
+    states = page_vars(page, "tef_assoc_state")
+    remaining = max((_int(v) for v in page_vars(page, "tef_assoc_time_left")), default=0)
+    return IotInstall(active="1" in states and remaining > 0, remaining_s=remaining)
