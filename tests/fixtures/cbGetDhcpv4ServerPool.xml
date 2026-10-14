@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Response><cbGetDhcpv4ServerPool><rtm_cfg_dhcpv4_svr_pool_totalCnt><totalCnt>3</totalCnt></rtm_cfg_dhcpv4_svr_pool_totalCnt><rtm_cfg_dhcpv4_svr_pool_0i>0</rtm_cfg_dhcpv4_svr_pool_0i><rtm_cfg_dhcpv4_svr_pool_0i>1</rtm_cfg_dhcpv4_svr_pool_0i><rtm_cfg_dhcpv4_svr_pool_0i>2</rtm_cfg_dhcpv4_svr_pool_0i><Result>0</Result></cbGetDhcpv4ServerPool></Response>

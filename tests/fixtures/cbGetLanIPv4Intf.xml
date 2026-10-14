@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Response><cbGetLanIPv4Intf><lan_ipv4_interface><ip_intf_id>1</ip_intf_id><eth_link_id>0</eth_link_id><adm_state>1</adm_state><ipv4_adm_state>1</ipv4_adm_state><ipv4_opr_status>1</ipv4_opr_status><br_id>4</br_id><igmp_snooping>1</igmp_snooping></lan_ipv4_interface><Result>0</Result></cbGetLanIPv4Intf></Response>
