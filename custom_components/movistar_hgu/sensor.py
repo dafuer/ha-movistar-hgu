@@ -206,6 +206,7 @@ SLOW_SENSORS: tuple[SlowSensorDescription, ...] = (
         translation_key="iot_install_remaining",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.SECONDS,
+        suggested_display_precision=0,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda d: d.iot.remaining_s,
     ),

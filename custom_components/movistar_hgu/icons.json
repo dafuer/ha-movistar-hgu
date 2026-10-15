@@ -17,7 +17,7 @@
         "default": "mdi:transit-connection-variant"
       },
       "onu_state": {
-        "default": "mdi:fiber-manual-record"
+        "default": "mdi:transit-connection-variant"
       },
       "pon_up_since": {
         "default": "mdi:timer-outline"
