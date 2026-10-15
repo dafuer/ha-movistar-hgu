@@ -1,13 +1,21 @@
 {
   "domain": "movistar_hgu",
   "name": "Movistar HGU (Askey Wi-Fi 7)",
-  "codeowners": [],
+  "codeowners": [
+    "@dafuer"
+  ],
   "config_flow": true,
-  "documentation": "https://github.com/OWNER/ha-movistar-hgu",
+  "documentation": "https://github.com/dafuer/ha-movistar-hgu",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/OWNER/ha-movistar-hgu/issues",
-  "loggers": ["custom_components.movistar_hgu", "asyncssh"],
-  "requirements": ["asyncssh>=2.14", "defusedxml>=0.7.1"],
+  "issue_tracker": "https://github.com/dafuer/ha-movistar-hgu/issues",
+  "loggers": [
+    "custom_components.movistar_hgu",
+    "asyncssh"
+  ],
+  "requirements": [
+    "asyncssh>=2.14",
+    "defusedxml>=0.7.1"
+  ],
   "version": "0.1.0"
 }

@@ -1,8 +1,9 @@
 """Turn raw router captures (captures/) into committable test fixtures.
 
 Every value that could identify the house or open it is replaced:
-credentials, Wi-Fi keys, serial numbers, phone number, public IP and MAC
-addresses (MACs are remapped consistently so relations between files hold).
+credentials, Wi-Fi keys, serial numbers, phone number, public IP, MAC
+addresses (remapped consistently so relations between files hold) and the
+per-router suffix of the default SSIDs (it is derived from the MAC).
 ASP pages are reduced to the handful of ``var`` lines the parsers read.
 
 Run: python3 -I tools/sanitize.py
@@ -25,6 +26,7 @@ SECRET_TAG = re.compile(
 )
 MAC = re.compile(r"\b([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b")
 PUBLIC_IP = re.compile(r"\b81\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
+SSID = re.compile(r"MOVISTAR(?:-[A-Za-z0-9]+)+")
 
 # Page variables the integration reads; everything else in a page is dropped.
 PAGE_VARS = {
@@ -63,8 +65,14 @@ def fake_mac(match: re.Match[str]) -> str:
     return out if match.group(0).isupper() or not match.group(0).islower() else out.lower()
 
 
+def fake_ssid(match: re.Match[str]) -> str:
+    parts = match.group(0).split("-")
+    return "-".join("0000" if re.fullmatch(r"[0-9A-Fa-f]{4}", p) else p for p in parts)
+
+
 def scrub_text(text: str) -> str:
     text = MAC.sub(fake_mac, text)
+    text = SSID.sub(fake_ssid, text)
     # Some hostnames embed the MAC without separators (e.g. the TV decoder).
     for original, fake in _mac_map.items():
         text = re.sub(original.replace(":", ""), fake.replace(":", ""), text, flags=re.I)
@@ -103,11 +111,22 @@ def main() -> int:
         src = SRC / name
         if src.exists():
             (DST / name).write_text(sanitize_page(name, src.read_text(encoding="latin-1")))
-    # Self-check: nothing that looks like a secret may survive.
+    # Self-check: nothing that looks like a secret may survive. The phone
+    # number is read from the capture, never written down here.
+    voice = SRC / "cbGetVoiceLine.xml"
+    phones = (
+        re.findall(r"<directory_number>(\d+)</", voice.read_text(encoding="latin-1"))
+        if voice.exists()
+        else []
+    )
     leaks = []
     for f in DST.iterdir():
         body = f.read_text()
-        if PUBLIC_IP.search(body) or re.search(r"ASKY[0-9A-F]{8}", body):
+        if (
+            PUBLIC_IP.search(body)
+            or re.search(r"ASKY[0-9A-F]{8}", body)
+            or any(n in body for n in phones)
+        ):
             leaks.append(f.name)
     if leaks:
         print("LEAK in", leaks)
