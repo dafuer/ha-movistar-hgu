@@ -132,3 +132,49 @@ async def test_guest_wifi_keeps_key(router, session) -> None:
     assert sent[-1].query["wlSsid"] == "MOVISTAR-0000-INV-WIFI7"
     assert sent[-1].query["wlAuthMode"] == "B4"
     assert GUEST_KEY not in repr(client.__dict__)
+
+
+async def test_recovers_by_itself_after_router_reboot() -> None:
+    """A reboot kills every open connection and the router-side session.
+
+    Seen live on 2026-10-15: with pooled keep-alive connections the client kept
+    failing in milliseconds after the router (and the NAT in between) came back,
+    until the integration was reloaded by hand.
+    """
+    from custom_components.movistar_hgu.hgu.client import new_session
+    from custom_components.movistar_hgu.hgu.errors import HguConnectionError
+
+    fake = FakeRouter()
+    server = TestServer(fake.app())
+    await server.start_server()
+    port = server.port
+    async with new_session() as session:
+        client = HguClient(session, f"{server.host}:{port}", PASSWORD)
+        await client.async_get_summary()
+
+        await server.close()  # the router goes away...
+        with pytest.raises(HguConnectionError):
+            await client.async_get_summary()
+
+        fake.expire_sessions()  # ...and comes back on the same address, sessions lost
+        server = TestServer(fake.app(), port=port)
+        await server.start_server()
+        try:
+            info = await client.async_get_summary()
+        finally:
+            await server.close()
+    assert info.model == "RTF8316VW"
+    assert fake.logins == 2
+
+
+async def test_login_after_reboot_starts_without_the_stale_cookie(router, session) -> None:
+    fake, host = router
+    client = HguClient(session, host, PASSWORD)
+    await client.async_get_summary()
+    old = {c.key: c.value for c in session.cookie_jar}["_httpdSessionId_"]
+    fake.expire_sessions()
+    await client.async_get_summary()
+    login_get = [r for r in fake.requests if r.method == "GET" and r.path == "/"][-1]
+    assert login_get is not None
+    new = {c.key: c.value for c in session.cookie_jar}["_httpdSessionId_"]
+    assert new != old

@@ -61,6 +61,22 @@ def _uri_component(value: str) -> str:
     return quote(value, safe="-_.!~*'()")
 
 
+def new_session() -> aiohttp.ClientSession:
+    """The HTTP session the client expects; the caller owns and closes it.
+
+    * ``force_close``: one TCP connection per request, no keep-alive pool. A
+      router reboot (or a NAT box in between restarting) leaves pooled
+      connections dead, and reusing them kept the client failing after the
+      router was back. On a LAN a fresh connection costs nothing.
+    * ``unsafe`` cookie jar: the router sets its session cookie on a bare IP,
+      which aiohttp's default jar drops.
+    """
+    return aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(force_close=True),
+        cookie_jar=aiohttp.CookieJar(unsafe=True),
+    )
+
+
 class HguClient:
     """One authenticated web session against the router."""
 
@@ -91,6 +107,9 @@ class HguClient:
 
     async def _login(self) -> None:
         self._logged_in = False
+        # The router only hands out a session cookie to a client that has
+        # none, and forgets all of them when it reboots: start clean.
+        self._session.cookie_jar.clear()
         await self._raw("GET", "/")  # the router hands out the session cookie here
         text = await self._raw(
             "POST",
@@ -146,6 +165,10 @@ class HguClient:
                 await self._login()
             try:
                 return await self._raw(method, path, data=data, expect_session=True)
+            except HguConnectionError:
+                # Unreachable usually means rebooting: its session is gone too.
+                self._logged_in = False
+                raise
             except HguSessionExpired:
                 _LOGGER.debug("Session expired on %s; logging in again", path)
                 await self._login()

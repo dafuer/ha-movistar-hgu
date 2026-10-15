@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
 
+import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -103,6 +104,7 @@ class HguRuntime:
     slow: HguSlowCoordinator
     config: HguConfigCoordinator
     cli: HguCli | None = None
+    session: aiohttp.ClientSession | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -133,6 +135,9 @@ class _Base[T](DataUpdateCoordinator[T]):
         except HguAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except HguError as err:
+            # The coordinator logs only the first failure of a streak; keep
+            # the type of every one at debug level to diagnose long outages.
+            _LOGGER.debug("%s failed: %r (cause %r)", self.name, err, err.__cause__)
             raise UpdateFailed(str(err)) from err
 
     async def _fetch(self) -> T:

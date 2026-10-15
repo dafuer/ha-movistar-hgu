@@ -205,3 +205,13 @@ async def test_wan_ip_change_event_survives_gaps_and_reloads(
     mock_client.async_get_wan_interfaces.return_value = with_voice_ip("10.22.202.3")
     await tick()
     assert events[-1].data["previous"] == "10.22.201.2"
+
+
+async def test_unload_logs_out_then_closes_its_own_http_session(
+    hass: HomeAssistant, setup_entry: MockConfigEntry, mock_client: MagicMock
+) -> None:
+    session = setup_entry.runtime_data.session
+    assert not session.closed
+    assert await hass.config_entries.async_unload(setup_entry.entry_id)
+    mock_client.async_logout.assert_awaited()
+    assert session.closed

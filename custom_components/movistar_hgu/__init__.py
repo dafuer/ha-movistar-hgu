@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import aiohttp
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .const import (
     CONF_SSH_ENABLED,
     CONF_SSH_HOST_KEY,
     CONF_SSH_PORT,
     DEFAULT_SSH_PORT,
-    DOMAIN,
 )
 from .coordinator import (
     HguConfigCoordinator,
@@ -22,7 +19,7 @@ from .coordinator import (
     HguSlowCoordinator,
 )
 from .hgu.cli import HguCli
-from .hgu.client import HguClient
+from .hgu.client import HguClient, new_session
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -33,23 +30,15 @@ PLATFORMS: list[Platform] = [
 ]
 
 
-def router_session(hass: HomeAssistant) -> aiohttp.ClientSession:
-    """One HTTP session for the integration, reused across reloads.
-
-    The router sets its session cookie on a bare IP, which aiohttp's default
-    cookie jar drops; hence the ``unsafe`` jar (and not the shared HA session).
-    """
-    store = hass.data.setdefault(DOMAIN, {})
-    if (session := store.get("session")) is None or session.closed:
-        session = store["session"] = async_create_clientsession(
-            hass, cookie_jar=aiohttp.CookieJar(unsafe=True)
-        )
-    return session
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: HguConfigEntry) -> bool:
     """Set up the router from a config entry."""
-    client = HguClient(router_session(hass), entry.data[CONF_HOST], entry.data[CONF_PASSWORD])
+    session = new_session()
+    client = HguClient(session, entry.data[CONF_HOST], entry.data[CONF_PASSWORD])
+
+    async def _close() -> None:
+        # Router-side session first, then the HTTP session it travels on.
+        await client.async_logout()
+        await session.close()
 
     cli = None
     if entry.options.get(CONF_SSH_ENABLED, False):
@@ -64,14 +53,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: HguConfigEntry) -> bool:
     slow = HguSlowCoordinator(hass, entry, client, cli)
     config = HguConfigCoordinator(hass, entry, client)
 
-    # Close the router-side session; the HTTP session itself is shared and
-    # closed by Home Assistant on shutdown.
-    entry.async_on_unload(client.async_logout)
-
-    await fast.async_load_traffic()
-    await slow.async_config_entry_first_refresh()
-    await fast.async_config_entry_first_refresh()
-    await config.async_config_entry_first_refresh()
+    try:
+        await fast.async_load_traffic()
+        await slow.async_config_entry_first_refresh()
+        await fast.async_config_entry_first_refresh()
+        await config.async_config_entry_first_refresh()
+    except BaseException:
+        await _close()
+        raise
+    entry.async_on_unload(_close)
 
     entry.runtime_data = HguRuntime(
         client=client,
@@ -79,6 +69,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HguConfigEntry) -> bool:
         slow=slow,
         config=config,
         cli=cli,
+        session=session,
         extra={"options": dict(entry.options)},
     )
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))

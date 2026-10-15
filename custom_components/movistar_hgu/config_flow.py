@@ -17,7 +17,7 @@ from homeassistant.helpers.selector import (
 
 from .const import CONF_SSH_ENABLED, CONF_SSH_PORT, DEFAULT_HOST, DEFAULT_SSH_PORT, DOMAIN
 from .coordinator import HguConfigEntry
-from .hgu.client import HguClient
+from .hgu.client import HguClient, new_session
 from .hgu.errors import HguAuthError, HguConnectionError, HguError
 from .hgu.models import SystemInfo
 
@@ -25,13 +25,12 @@ _PASSWORD = TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD))
 
 
 async def _validate(hass: Any, host: str, password: str) -> SystemInfo:
-    from . import router_session
-
-    client = HguClient(router_session(hass), host, password)
-    try:
-        return await client.async_get_summary()
-    finally:
-        await client.async_logout()
+    async with new_session() as session:
+        client = HguClient(session, host, password)
+        try:
+            return await client.async_get_summary()
+        finally:
+            await client.async_logout()
 
 
 def _errors_for(err: Exception) -> dict[str, str]:
