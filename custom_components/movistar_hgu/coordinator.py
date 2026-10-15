@@ -28,6 +28,7 @@ from .const import (
     CONF_SSH_HOST_KEY,
     CONFIG_INTERVAL,
     DOMAIN,
+    EVENT_WAN_IP_CHANGED,
     FAST_INTERVAL,
     GUEST_ACCESS_POINT,
     MAX_LINK_BPS,
@@ -150,8 +151,13 @@ class HguFastCoordinator(_Base[FastData]):
         self._last_sample: float | None = None
         self._last_eth_total: int | None = None
         self._totals = {role: TrafficSample() for role in TRAFFIC_ROLES}
+        self._ip_store: Store[dict[str, str]] = Store(
+            hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}.wan_ips"
+        )
+        self._last_ips: dict[str, str] = {}
 
     async def async_load_traffic(self) -> None:
+        self._last_ips = await self._ip_store.async_load() or {}
         stored = await self._store.async_load() or {}
         for key, state in stored.items():
             self._acc[key] = TrafficAccumulator.from_state(state, max_bps=MAX_LINK_BPS)
@@ -165,8 +171,39 @@ class HguFastCoordinator(_Base[FastData]):
             self._acc[key] = TrafficAccumulator(max_bps=MAX_LINK_BPS)
         return self._acc[key]
 
+    def _track_ips(self, wans: list[WanInterface]) -> None:
+        """Fire an event when a WAN IP differs from the last one ever seen.
+
+        Comparing against the last known IP rather than the previous state
+        catches the change that matters most: the router reboots, every
+        entity goes unavailable, and the voice VLAN comes back with a new IP.
+        """
+        changed = False
+        for wan in wans:
+            if wan.role not in TRAFFIC_ROLES or not wan.ipv4 or wan.ipv4 == "0.0.0.0":
+                continue
+            role = str(wan.role)
+            previous = self._last_ips.get(role)
+            if previous == wan.ipv4:
+                continue
+            self._last_ips[role] = wan.ipv4
+            changed = True
+            if previous is not None and self.config_entry is not None:
+                self.hass.bus.async_fire(
+                    EVENT_WAN_IP_CHANGED,
+                    {
+                        "entry_id": self.config_entry.entry_id,
+                        "role": role,
+                        "previous": previous,
+                        "current": wan.ipv4,
+                    },
+                )
+        if changed:
+            self._ip_store.async_delay_save(lambda: dict(self._last_ips), 5)
+
     async def _fetch(self) -> FastData:
         wans = await self.client.async_get_wan_interfaces()
+        self._track_ips(wans)
         stats = await self.client.async_get_statistics()
         now = time.monotonic()
         elapsed = None if self._last_sample is None else now - self._last_sample

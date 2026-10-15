@@ -145,3 +145,63 @@ async def test_button_error_is_reported(
         await hass.services.async_call(
             "button", "press", {ATTR_ENTITY_ID: _entity(hass, "reboot", "button")}, blocking=True
         )
+
+
+async def test_wan_ip_change_event_survives_gaps_and_reloads(
+    hass: HomeAssistant, setup_entry: MockConfigEntry, mock_client: MagicMock, freezer
+) -> None:
+    from homeassistant.core import Event
+
+    from custom_components.movistar_hgu.const import EVENT_WAN_IP_CHANGED
+    from custom_components.movistar_hgu.hgu.errors import HguConnectionError
+    from custom_components.movistar_hgu.hgu.models import WanRole
+
+    events: list[Event] = []
+    hass.bus.async_listen(EVENT_WAN_IP_CHANGED, events.append)
+    wans = mock_client.async_get_wan_interfaces.return_value
+
+    def with_voice_ip(ip: str) -> list:
+        return [dataclasses.replace(w, ipv4=ip) if w.role is WanRole.VOICE else w for w in wans]
+
+    async def tick() -> None:
+        freezer.tick(timedelta(seconds=31))
+        async_fire_time_changed(hass)
+        await hass.async_block_till_done()
+
+    # Same IP: nothing. The first sample after setup only records the IP.
+    await tick()
+    assert events == []
+
+    # A plain change between two polls.
+    mock_client.async_get_wan_interfaces.return_value = with_voice_ip("10.22.200.1")
+    await tick()
+    assert [e.data for e in events] == [
+        {
+            "entry_id": setup_entry.entry_id,
+            "role": "voice",
+            "previous": "10.22.195.244",
+            "current": "10.22.200.1",
+        }
+    ]
+
+    # The router goes away (entities unavailable) and comes back with a new IP:
+    # the change is still reported against the last IP seen before the gap.
+    mock_client.async_get_wan_interfaces.side_effect = HguConnectionError("rebooting")
+    await tick()
+    mock_client.async_get_wan_interfaces.side_effect = None
+    mock_client.async_get_wan_interfaces.return_value = with_voice_ip("10.22.201.2")
+    await tick()
+    assert events[-1].data["previous"] == "10.22.200.1"
+    assert events[-1].data["current"] == "10.22.201.2"
+
+    # The last IP is remembered across a reload (HA restart).
+    await tick()  # let the delayed store save run
+    freezer.tick(timedelta(seconds=10))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_reload(setup_entry.entry_id)
+    await hass.async_block_till_done()
+    assert len(events) == 2
+    mock_client.async_get_wan_interfaces.return_value = with_voice_ip("10.22.202.3")
+    await tick()
+    assert events[-1].data["previous"] == "10.22.201.2"

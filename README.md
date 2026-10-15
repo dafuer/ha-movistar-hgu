@@ -26,6 +26,25 @@ Controls (configuration category, not exposed to voice assistants):
 - **Start / cancel IoT install** — opens the router's 10-minute IoT pairing window
 - **Guest Wi-Fi** switch — re-sends the current guest configuration, so the key is preserved
 
+### Event: `movistar_hgu_wan_ip_changed`
+
+Fired when a WAN interface (internet, voice or TV) shows a different IPv4 than
+the last one seen. The last IP is remembered across router reboots and Home
+Assistant restarts, so a router that comes back from a reboot with a new IP is
+reported even though the entities went `unavailable` in between. Data:
+`entry_id`, `role` (`internet` / `voice` / `iptv`), `previous`, `current`.
+
+Typical use: an Asterisk/SIP setup that pins the voice VLAN IP
+(`external_media_address`) loses audio when that IP changes.
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: movistar_hgu_wan_ip_changed
+    event_data:
+      role: voice
+```
+
 ## Installation
 
 ### HACS (custom repository)

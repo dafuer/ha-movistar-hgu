@@ -26,3 +26,8 @@ MAX_LINK_BPS: Final = 10_000_000_000
 
 IOT_INSTALL_SECONDS: Final = 600
 GUEST_ACCESS_POINT: Final = 2
+
+# Fired when a WAN interface comes back with a different IPv4 than the last one
+# seen (also across router reboots and HA restarts). Data: entry_id, role
+# (internet / voice / iptv), previous, current.
+EVENT_WAN_IP_CHANGED: Final = "movistar_hgu_wan_ip_changed"
