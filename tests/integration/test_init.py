@@ -228,7 +228,8 @@ async def test_client_tracker_declares_its_device_by_mac(
 
     coordinator = setup_entry.runtime_data.slow
     host = next(h for h in coordinator.data.hosts if h.mac == "02:00:00:00:00:03")
-    info = HguClientTracker(coordinator, host)._attr_device_info
+    router = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, SERIAL)})
+    info = HguClientTracker(coordinator, host, router.id)._attr_device_info
     assert info["connections"] == {(dr.CONNECTION_NETWORK_MAC, "02:00:00:00:00:03")}
     assert info["name"] == "Archer_C9"
-    assert info["via_device"] == (DOMAIN, SERIAL)
+    assert info["via_device_id"] == router.id

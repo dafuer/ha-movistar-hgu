@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from homeassistant.components.device_tracker import ScannerEntity, SourceType
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
 from .coordinator import HguConfigEntry, HguSlowCoordinator
+from .entity import router_device_info
 from .hgu.models import Host
 
 
@@ -20,13 +21,19 @@ async def async_setup_entry(
 ) -> None:
     coordinator = entry.runtime_data.slow
     tracked: set[str] = set()
+    # Client devices hang from the router; its registry id is what HA expects.
+    router_id = (
+        dr.async_get(hass)
+        .async_get_or_create(config_entry_id=entry.entry_id, **router_device_info(entry))
+        .id
+    )
 
     @callback
     def _add_new() -> None:
         new = [h for h in coordinator.data.hosts if h.mac not in tracked]
         if new:
             tracked.update(h.mac for h in new)
-            async_add_entities(HguClientTracker(coordinator, h) for h in new)
+            async_add_entities(HguClientTracker(coordinator, h, router_id) for h in new)
 
     _add_new()
     entry.async_on_unload(coordinator.async_add_listener(_add_new))
@@ -38,7 +45,7 @@ class HguClientTracker(CoordinatorEntity[HguSlowCoordinator], ScannerEntity):
     _attr_entity_registry_enabled_default = False
     _attr_source_type = SourceType.ROUTER
 
-    def __init__(self, coordinator: HguSlowCoordinator, host: Host) -> None:
+    def __init__(self, coordinator: HguSlowCoordinator, host: Host, router_id: str) -> None:
         super().__init__(coordinator)
         self._mac = host.mac
         self._host = host
@@ -46,11 +53,10 @@ class HguClientTracker(CoordinatorEntity[HguSlowCoordinator], ScannerEntity):
         # The client's own device, found by its MAC: an existing device with that
         # connection (a Shelly, a phone) is reused; otherwise one is created behind
         # the router. Required for ScannerEntity from HA 2027.11.
-        entry = coordinator.config_entry
         self._attr_device_info = DeviceInfo(
             connections={(CONNECTION_NETWORK_MAC, host.mac)},
             name=host.hostname or host.mac,  # what HA itself uses; default_name is deprecated
-            via_device=(DOMAIN, entry.unique_id or entry.entry_id),
+            via_device_id=router_id,
         )
 
     @callback
