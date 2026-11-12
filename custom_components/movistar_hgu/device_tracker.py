@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from homeassistant.components.device_tracker import ScannerEntity, SourceType
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .const import DOMAIN
 from .coordinator import HguConfigEntry, HguSlowCoordinator
 from .hgu.models import Host
 
@@ -41,6 +43,15 @@ class HguClientTracker(CoordinatorEntity[HguSlowCoordinator], ScannerEntity):
         self._mac = host.mac
         self._host = host
         self._attr_unique_id = f"{host.mac}_tracker"
+        # The client's own device, found by its MAC: an existing device with that
+        # connection (a Shelly, a phone) is reused; otherwise one is created behind
+        # the router. Required for ScannerEntity from HA 2027.11.
+        entry = coordinator.config_entry
+        self._attr_device_info = DeviceInfo(
+            connections={(CONNECTION_NETWORK_MAC, host.mac)},
+            default_name=host.hostname or host.mac,
+            via_device=(DOMAIN, entry.unique_id or entry.entry_id),
+        )
 
     @callback
     def _handle_coordinator_update(self) -> None:

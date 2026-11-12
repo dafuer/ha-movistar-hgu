@@ -16,7 +16,7 @@ hardware: only the router's admin password.
 | Traffic | Downloaded and uploaded totals per VLAN (energy-style `total_increasing`, survive HA and router restarts, 32-bit counter wraps handled) and current rates in Mbit/s |
 | Fiber | Optical RX/TX power, module temperature, voltage, laser bias, ONT state (O1–O7), fiber up since |
 | System | Last boot, CPU, memory, load averages |
-| Clients | Connected / wired / Wi-Fi counts; optional device trackers per MAC (disabled by default) |
+| Clients | Connected / wired / Wi-Fi counts; optional device trackers per MAC (disabled by default), each on the device with that MAC or on a new one behind the router |
 | Wi-Fi & config | 2.4/5 GHz radios and channels, guest network, port mappings and DMZ, UPnP, remote syslog, router voice line |
 | SSH (optional) | SoC and radio temperatures, TR-069 remote management status |
 

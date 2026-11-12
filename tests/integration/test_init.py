@@ -215,3 +215,21 @@ async def test_unload_logs_out_then_closes_its_own_http_session(
     assert await hass.config_entries.async_unload(setup_entry.entry_id)
     mock_client.async_logout.assert_awaited()
     assert session.closed
+
+
+async def test_client_tracker_declares_its_device_by_mac(
+    hass: HomeAssistant, setup_entry: MockConfigEntry
+) -> None:
+    """HA 2027.11 requires ScannerEntity device info with the client's MAC as a connection."""
+    from homeassistant.helpers import device_registry as dr
+
+    from custom_components.movistar_hgu.const import DOMAIN
+    from custom_components.movistar_hgu.device_tracker import HguClientTracker
+
+    coordinator = setup_entry.runtime_data.slow
+    host = next(h for h in coordinator.data.hosts if h.mac == "02:00:00:00:00:03")
+    info = HguClientTracker(coordinator, host)._attr_device_info
+    assert info["connections"] == {(dr.CONNECTION_NETWORK_MAC, "02:00:00:00:00:03")}
+    assert info["default_name"] == "Archer_C9"
+    assert info["via_device"] == (DOMAIN, SERIAL)
+    assert "name" not in info  # never renames a device the user or another integration named
