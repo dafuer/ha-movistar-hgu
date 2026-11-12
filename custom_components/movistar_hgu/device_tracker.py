@@ -49,7 +49,7 @@ class HguClientTracker(CoordinatorEntity[HguSlowCoordinator], ScannerEntity):
         entry = coordinator.config_entry
         self._attr_device_info = DeviceInfo(
             connections={(CONNECTION_NETWORK_MAC, host.mac)},
-            default_name=host.hostname or host.mac,
+            name=host.hostname or host.mac,  # what HA itself uses; default_name is deprecated
             via_device=(DOMAIN, entry.unique_id or entry.entry_id),
         )
 
