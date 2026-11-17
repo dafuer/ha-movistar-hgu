@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from typing import Final
 from urllib.parse import quote
 
@@ -75,6 +76,17 @@ def new_session() -> aiohttp.ClientSession:
         connector=aiohttp.TCPConnector(force_close=True),
         cookie_jar=aiohttp.CookieJar(unsafe=True),
     )
+
+
+_RESULT = re.compile(r"<Result>\s*([^<\s]*)\s*</Result>")
+
+
+def _read_failed(path: str, text: str) -> bool:
+    """True when a ``cbGet*`` read answered with a ``Result`` other than 0."""
+    if not path.startswith("/cgi-bin/cbGet"):
+        return False
+    match = _RESULT.search(text)
+    return match is not None and match.group(1) != "0"
 
 
 class HguClient:
@@ -164,7 +176,14 @@ class HguClient:
             if not self._logged_in:
                 await self._login()
             try:
-                return await self._raw(method, path, data=data, expect_session=True)
+                text = await self._raw(method, path, data=data, expect_session=True)
+                if _read_failed(path, text):
+                    # A dead session may also come back as HTTP 200 with
+                    # <Result>1</Result> (seen live on 2026-11-17). Treat it
+                    # as expired; a genuine error repeats and the parser
+                    # raises on the retried answer.
+                    raise HguSessionExpired(path)
+                return text
             except HguConnectionError:
                 # Unreachable usually means rebooting: its session is gone too.
                 self._logged_in = False

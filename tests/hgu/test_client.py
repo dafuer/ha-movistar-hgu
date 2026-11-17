@@ -9,7 +9,11 @@ import pytest
 from aiohttp.test_utils import TestServer
 
 from custom_components.movistar_hgu.hgu.client import HguClient
-from custom_components.movistar_hgu.hgu.errors import HguAuthError, HguForbiddenCommand
+from custom_components.movistar_hgu.hgu.errors import (
+    HguAuthError,
+    HguForbiddenCommand,
+    HguResponseError,
+)
 from custom_components.movistar_hgu.hgu.models import WanRole
 
 from .fake_router import GUEST_KEY, PASSWORD, FakeRouter
@@ -46,6 +50,29 @@ async def test_relogin_once_when_session_expires(router, session) -> None:
     fake.expire_sessions()
     wans = await client.async_get_wan_interfaces()
     assert {w.role for w in wans} >= {WanRole.VOICE}
+    assert fake.logins == 2
+
+
+async def test_relogin_when_dead_session_answers_result_1(router, session) -> None:
+    fake, host = router
+    fake.dead_session_result_1 = True
+    client = HguClient(session, host, PASSWORD)
+    await client.async_get_summary()
+    fake.expire_sessions()
+    wans = await client.async_get_wan_interfaces()
+    assert {w.role for w in wans} >= {WanRole.VOICE}
+    assert fake.logins == 2
+
+
+async def test_result_1_with_live_session_fails_after_one_retry(router, session) -> None:
+    fake, host = router
+    client = HguClient(session, host, PASSWORD)
+    await client.async_get_summary()
+    fake.failing.add("cbGetWanIPIntf")
+    with pytest.raises(HguResponseError, match="Result='1'"):
+        await client.async_get_wan_interfaces()
+    assert fake.logins == 2
+    assert await client.async_get_summary()
     assert fake.logins == 2
 
 

@@ -43,6 +43,11 @@ class FakeRouter:
     guest_enabled: bool = False
     iot_remaining: int = 0
     rebooted: bool = False
+    # How a dead session is answered on .xml: HTTP 400 (usual) or, as seen
+    # live on 2026-11-17, HTTP 200 with <Result>1</Result>.
+    dead_session_result_1: bool = False
+    # Endpoints that answer <Result>1</Result> even with a live session.
+    failing: set[str] = field(default_factory=set)
 
     def expire_sessions(self) -> None:
         self.sessions.clear()
@@ -105,9 +110,13 @@ class FakeRouter:
         return web.Response(text="bye")
 
     async def _xml(self, request: web.Request) -> web.Response:
-        if not self._authed(request):
-            return web.Response(status=400, text="<HTML>Access Error: 400</HTML>")
         name = request.match_info["name"]
+        if not self._authed(request):
+            if self.dead_session_result_1:
+                return _result_1(name)
+            return web.Response(status=400, text="<HTML>Access Error: 400</HTML>")
+        if name in self.failing:
+            return _result_1(name)
         if name == "cbReboot":
             form = await request.post()
             if form.get("sessionKey") != "0123456789":
@@ -169,6 +178,13 @@ class FakeRouter:
         assert xor(request.query["wlWpaPsk"]) == GUEST_KEY, "guest key would be lost"
         self.guest_enabled = request.query.get("wlEnbl") == "1"
         raise web.HTTPFound(request.query.get("curWebPage", "/te_wifi_guest.asp"))
+
+
+def _result_1(name: str) -> web.Response:
+    return web.Response(
+        text=f"<Response><{name}><Result>1</Result></{name}></Response>",
+        content_type="text/xml",
+    )
 
 
 def parse_query(raw: str) -> dict[str, str]:
